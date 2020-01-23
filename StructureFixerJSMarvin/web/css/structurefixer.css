@@ -1,0 +1,84 @@
+/* 
+    Document   : structurefixer
+    Created on : Apr 10, 2011, 9:06:03 PM
+    Author     : Mitch
+    Description:
+        Purpose of the stylesheet follows.
+*/
+
+/* 
+   TODO customize this sample style
+   Syntax recommendation http://www.w3.org/TR/REC-CSS2/
+*/
+
+root { 
+    display: block;
+}
+
+.structTable
+{
+	border-width: 1px;
+	border-style:ridge;
+	border-color: black;
+	width: 95%;
+}
+.dataCell
+{
+	border-width: 1px;
+	border-style:ridge;
+	border-color: black;
+}
+
+.dataCellHighlighted
+{
+	border-width: 2px;
+	border-style:solid;
+	border-color: red;
+}
+
+.chemNameCell
+{
+	border-width: 1px;
+	border-style:ridge;
+	border-color: black;
+	width: 300px;
+}
+.structureBoxDiv 
+{
+  padding: .5em;
+  width: 600px;
+  left: 0em;
+  text-align: left;
+  float: left;
+  margin:0 auto;
+}
+
+.formElementDiv
+{
+  padding: .5em;
+  width: 220px;
+  text-align: left;
+  float: right;
+  margin:0 auto;
+}
+
+.structureQueryBox
+{
+  padding: 0em;
+  width: 210px;
+	height: 210px;
+  margin:0 auto;
+	float: left;
+}
+
+.structureResultsBox
+{
+  padding: .5em;
+  width: 220px;
+	height: 220px;
+  text-align: left;
+  float: right;
+  margin:0 auto;
+	
+}
+

@@ -1,0 +1,260 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<web-app version="2.5" xmlns="http://java.sun.com/xml/ns/javaee" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd">
+	<description>Allow the user to specify a structure to use to reorient the display of a class of compounds</description>
+	<display-name>Structure Fixer</display-name>
+	<context-param>
+		<description>Database server</description>
+		<param-name>servername</param-name>
+		<!--param-value>localhost</param-value-->
+		<!-- value on prod server: lchemdb1 -->
+		<param-value>chemdevdb.nlm.nih.gov</param-value>
+	</context-param>
+	<context-param>
+		<param-name>databaseSID</param-name>
+		<!--param-value>THINK</param-value-->
+		<param-value>chemid</param-value>
+	</context-param>
+	<context-param>
+		<param-name>dbport</param-name>
+		<param-value>1521</param-value>
+		<!-- prod from home -param-value>61521</param-value-->
+		<!--param-value>7521</param-value-->
+	</context-param>
+	<context-param>
+		<param-name>dbusername</param-name>
+		<!--param-value>CHEM</param-value-->
+		<param-value>mdldb_2d</param-value>
+	</context-param>
+	<context-param>
+		<param-name>dbpassword</param-name>
+		<!--param-value>CHEM</param-value-->
+		<param-value>4other.go</param-value>
+	</context-param>
+	<context-param>
+		<description>SQL to set up the Cheshire environment</description>
+		<param-name>CheshireInit</param-name>
+		<param-value>select chesh.createEnv() from dual</param-value>
+	</context-param>
+	<context-param>
+		<param-name>CheshireLoadMol</param-name>
+		<param-value>Select chesh.loadCTFile('templateMol', mdlaux.readfile('%s')) from dual</param-value>
+	</context-param>
+	<context-param>
+		<param-name>ChemTable</param-name>
+		<param-value>newdb_2d_moltable</param-value>
+	</context-param>
+	<context-param>
+		<param-name>StructureIdField</param-name>
+		<param-value>ID</param-value>
+	</context-param>
+	<context-param>
+		<param-name>LocatorTableID</param-name>
+		<param-value>TXTSUPERLISTID</param-value>
+	</context-param>
+	<context-param>
+		<param-name>SuperlistTableID</param-name>
+		<param-value>TXTSUPERLISTID</param-value>
+	</context-param>
+	<context-param>
+		<param-name>CheshireViewQuery</param-name>
+		<param-value>select id, molname, molwt(ctab), molfmla(ctab), chime_string(chesh.unloadTarget()), chime_string(ctab)  from %s where sss(ctab, '%s', 3) = 1 and runScript((%s), molfile(ctab), cheshVarsList('outMol'), 2) = 1</param-value>
+	</context-param>
+	<context-param>
+		<param-name>CheshireViewQueryPlus</param-name>
+		<param-value>
+			select id, molname, molweight, molfmla(ctab), chime_string(ctab), chime_string(chesh.unloadTarget()) from %s where sss(ctab, '%s', 3) = 1 and runScript((%s), molfile(ctab), cheshVarsList('outMol'), 2) = 1 and %s &lt; %s
+			select id, molname, molweight, molfmla(ctab), chime_string(ctab), chime_string(chesh.unloadTarget()) from %s where sss(ctab, '%s', 3) = 1 and runScript((%s), molfile(ctab), cheshVarsList('outMol'), 2) = 1 and %s &lt; %s
+		</param-value>
+	</context-param>
+	<context-param>
+		<param-name>CheshireViewQueryPlus2</param-name>
+		<!--param-value>
+				select id, molname, molwt(ctab) as molwt, molfmla(ctab) as molfmla, nvl(updateflag,0) as TimesUpdated,
+chime_string(ctab) as initstr, chime_string(chesh.unloadtarget()) as cleanedandoriented,
+chime_string(cheshVar1(2)) as onlyoriented from %s
+where sss(ctab, '%s', 3) = 1 and runScript((%s), molfile(ctab), cheshVarsList('outMol1'), 2) = 1 and %s &lt; %s	ORDER BY ID
+		</param-value-->
+		<param-value>
+			select id, nvl(molname, GETANAMEFORCHEM(ID)) as molname, molweight as molwt, molfmla(ctab) as molfmla, nvl(updateflag,0) as TimesUpdated,
+			chime_string(ctab) as initstr, chime_string(chesh.unloadtarget()) as cleanedandoriented,
+			chime_string(cheshVar1(2)) as onlyoriented from %s where sss(ctab, '%s', 3) = 1 and runScript((%s), molfile(ctab), cheshVarsList('outMol1'), 2) = 1 and %s &lt; %s ORDER BY ID
+		</param-value>
+	</context-param>
+	<context-param>
+		<param-name>StructureIDRequiresQuotes</param-name>
+		<param-value>true</param-value>
+	</context-param>
+	<context-param>
+		<param-name>molweightfieldname</param-name>
+		<param-value>molweight</param-value>
+	</context-param>
+	<context-param>
+		<param-name>CheshireUpdateSQL</param-name>
+		<description>SQL to update chemical structure table based on Cheshire script</description>
+		<param-value>update %s set ctab = mol(chesh.unloadTarget()), updateflag = nvl(updateflag,0) +1 where runScript((%s), molfile(ctab), cheshVarsList('outMol1' ), 2) = 1 and %s in (%s)</param-value>
+	</context-param>
+	<context-param>
+		<param-name>cheshirescripttable</param-name>
+		<param-value>cheshirescripts</param-value>
+	</context-param>
+	<context-param>
+		<description>Name of entry in cheshirescripttable</description>
+		<param-name>OrientScriptName</param-name>
+		<param-value>Orient2</param-value>
+	</context-param>
+	<context-param>
+		<description>Name of entry in cheshirescripttable which cleans first, then orients to a template</description>
+		<param-name>OrientScriptName1</param-name>
+		<param-value>CleanThenOrientDefine</param-value>
+	</context-param>
+	<context-param>
+		<description>Name of entry in cheshirescripttable which cleans first, then orients to a template</description>
+		<param-name>CleanOrientScriptName2</param-name>
+		<param-value>CleanThenOrientRun</param-value>
+	</context-param>
+	<context-param>
+		<param-name>ScriptLoadingSQL</param-name>
+		<param-value>select chesh.loadScript((select scripttext from cheshirescripts where scriptname = 'CleanThenOrientDefine')) from dual</param-value>
+		<description>Pulls Cheshire script from a db table</description>
+	</context-param>
+	<context-param>
+		<param-name>ScriptLoadingSQL0</param-name>
+		<param-value>select chesh.loadScript((select scripttext from cheshirescripts where scriptname = 'MDLEnhancedClean')) from dual</param-value>
+		<description>Pulls Cheshire script from a db table</description>
+	</context-param>
+	<context-param>
+		<param-name>ScriptRunningSQL</param-name>
+		<param-value>select scripttext from cheshirescripts where scriptname = 'CleanThenOrientRun'</param-value>
+		<description>Pulls Cheshire script from a db table</description>
+	</context-param>
+	<context-param>
+		<param-name>ScriptRunningSQLOrientOnly</param-name>
+		<param-value>select scripttext from cheshirescripts where scriptname = 'Orient2'</param-value>
+		<description>Pulls Cheshire script from a db table for orientation but no cleaning</description>
+	</context-param>
+	<context-param>
+		<description>maximum number of records to process on a page</description>
+		<param-name>MaxRecordsPerPage</param-name>
+		<param-value>10</param-value>
+	</context-param>
+	<context-param>
+		<param-name>CheshireViewQueryPlus3</param-name>
+		<param-value> select ID, nvl(molname, GETANAMEFORCHEM(hrID)) as molname, molweight as molwt, molfmla(ctab) as molfmla, nvl(updateflag,0) as TimesUpdated, chime_string(ctab) as initstr, chime_string(chesh.unloadtarget()) as cleanedandoriented, chime_string(cheshVar1(2)) as onlyoriented, t2.CITATIONCOUNT from %s t1, %s t2 where sss(ctab, '%s', 3) = 1 and runScript((%s), molfile(ctab), cheshVarsList('outMol1'), 2) = 1 and %s &gt;= %s and t1.hrid =t2.txtsuperlistid ORDER BY HRID</param-value>
+	</context-param>
+	<context-param>
+		<param-name>SuperListTableName</param-name>
+		<param-value>tbl_superlist</param-value>
+	</context-param>
+	<context-param>
+		<description>column with # citations</description>
+		<param-name>CitationCountFieldName</param-name>
+		<param-value>CITATIONCOUNT</param-value>
+	</context-param>
+	<context-param>
+		<param-name>ColumnListMain</param-name>
+		<param-value>[newdb_2d_moltable].ID, GETANAMEFORCHEM([newdb_2d_moltable].ID) as molname, [newdb_2d_moltable].molweight as molwt, molfmla([newdb_2d_moltable].ctab) as molfmla, nvl([newdb_2d_moltable].updateflag,0) as TimesUpdated, molfile([newdb_2d_moltable].ctab) as initstr, chesh.unloadtarget() as cleanedandoriented, molfmla(mol(chesh.unloadtarget())) as cleanedandorientedmf, cheshVar1(2) as onlyoriented
+		</param-value>
+	</context-param>
+	<context-param>
+		<param-name>LocatorTableName</param-name>
+		<param-value>tbl_locator</param-value>
+	</context-param>
+	<context-param>
+		<param-name>LocatorQueryColumn</param-name>
+		<param-value>MEMDATAUPR</param-value>
+	</context-param>
+	<context-param>
+		<param-name>StructureViewHeight</param-name>
+		<param-value>200</param-value>
+	</context-param>
+	<context-param>
+		<param-name>StructureViewWidth</param-name>
+		<param-value>200</param-value>
+	</context-param>
+	<filter>
+		<filter-name>SafetyFilter</filter-name>
+		<filter-class>com.thinkscience.demo.utilities.SafetyFilter</filter-class>
+		<init-param>
+			<param-name>ProhibitedStrings</param-name>
+			<param-value>abc</param-value>
+		</init-param>
+	</filter>
+	<filter-mapping>
+		<filter-name>SafetyFilter</filter-name>
+		<url-pattern>/*</url-pattern>
+	</filter-mapping>
+	<servlet>
+		<servlet-name>StructureFixerServlet</servlet-name>
+		<servlet-class>com.thinkscience.demo.structurecleaner.servlets.StructureFixerServlet</servlet-class>
+	</servlet>
+	<servlet>
+		<servlet-name>StructureFixSaverServlet</servlet-name>
+		<servlet-class>com.thinkscience.demo.structurecleaner.servlets.StructureFixSaverServlet</servlet-class>
+	</servlet>
+	<servlet>
+		<servlet-name>StructureFixerPager</servlet-name>
+		<servlet-class>com.thinkscience.demo.structurecleaner.servlets.StructureFixerPager</servlet-class>
+	</servlet>
+	<servlet>
+		<servlet-name>ResetServlet</servlet-name>
+		<servlet-class>com.thinkscience.demo.structurecleaner.servlets.ResetServlet</servlet-class>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>StructureFixerServlet</servlet-name>
+		<url-pattern>/StructureFixerServlet</url-pattern>
+	</servlet-mapping>
+	<servlet-mapping>
+		<servlet-name>StructureFixSaverServlet</servlet-name>
+		<url-pattern>/StructureFixSaver</url-pattern>
+	</servlet-mapping>
+	<servlet-mapping>
+		<servlet-name>StructureFixerPager</servlet-name>
+		<url-pattern>/StructureFixerPager</url-pattern>
+	</servlet-mapping>
+	<servlet-mapping>
+		<servlet-name>ResetServlet</servlet-name>
+		<url-pattern>/ResetServlet</url-pattern>
+	</servlet-mapping>
+	<session-config>
+		<session-timeout>
+			30
+		</session-timeout>
+	</session-config>
+	<welcome-file-list>
+		<welcome-file>index.jsp</welcome-file>
+	</welcome-file-list>
+	<security-constraint>
+    <web-resource-collection>
+      <web-resource-name>dbmaint</web-resource-name>
+      <description>DBMAINT</description>
+      <url-pattern>/*</url-pattern>
+      </web-resource-collection>
+        <auth-constraint>
+        <role-name>dbmaint</role-name>
+      </auth-constraint>
+  </security-constraint>
+  <login-config>
+    <auth-method>BASIC</auth-method>
+    <!--form-login-config>
+      <form-login-page>/login.jsp</form-login-page>
+      <form-error-page>/loginerror.jsp</form-error-page>
+    </form-login-config-->
+  </login-config>
+	<security-role>
+		<description>DB Maintenance Users</description>
+		<role-name>dbmaint</role-name>
+	</security-role>
+	<!--security-constraint>
+		<web-resource-collection>
+			<web-resource-name>Entire Application</web-resource-name>
+			<url-pattern>/*</url-pattern>
+		</web-resource-collection>
+		<auth-constraint>
+			<role-name>dbmaint</role-name>
+		</auth-constraint>
+	</security-constraint>
+	<security-role>
+		<description>DB Maintenance Users</description>
+		<role-name>dbmaint</role-name>
+	</security-role-->
+</web-app>

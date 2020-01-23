@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta http-equiv="content-type" content="text/html; charset=UTF-8" />
+	<title>Marvin-JS Examples - Demo</title>
+	<link type="text/css" rel="stylesheet" href="../css/doc.css">
+	<link type="text/css" rel="stylesheet" href="../js/lib/rainbow/github.css" />
+	<script src="../js/lib/rainbow/rainbow-custom.min.js"></script>
+	<script src="../js/lib/jquery-1.9.1.min.js"></script>
+	<script src="../js/util.js"></script>
+	<script type="text/javascript">
+
+		var marvinSketcherInstance;
+
+		$(document).ready(function handleDocumentReady (e) {
+			getMarvinPromise("#sketch").done(function (sketcherInstance) {
+				marvinSketcherInstance = sketcherInstance;
+				marvinSketcherInstance.importAsMol(caffeineSource);
+				marvinSketcherInstance.setDisplaySettings({
+					'carbonLabelVisible' : true,
+					'atomIndicesVisible' : true
+				});
+
+				$("#getSelectionButton").on("click", function handleGetSelectionButton () {
+					$("#atoms").val("");
+					$("#bonds").val("");
+					var selection = marvinSketcherInstance.getSelection();
+					$("#atoms").val(selection['atoms']);
+					$("#bonds").val(selection['bonds']);
+				});
+
+				$("#setSelectionButton").on("click", function handleSetSelectionButton () {
+					marvinSketcherInstance.setSelection({
+						'atoms' : $('#atoms').val(),
+						'bonds' : $('#bonds').val()
+					});
+				});
+
+			}).fail(function () {
+				alert("Cannot retrieve sketcher instance from iframe");
+			});
+		});
+
+		var caffeineSource = "\n\n\n"+
+			" 14 15  0  0  0  0  0  0  0  0999 V2000\n"+
+			"    0.5089    7.8316    0.0000 C   0  0  0  0  0  0  0  0  0  0  0  0\n"+
+			"    1.2234    6.5941    0.0000 C   0  0  0  0  0  0  0  0  0  0  0  0\n"+
+			"    1.2234    7.4191    0.0000 C   0  0  0  0  0  0  0  0  0  0  0  0\n"+
+			"   -0.2055    6.5941    0.0000 C   0  0  0  0  0  0  0  0  0  0  0  0\n"+
+			"   -0.9200    7.8316    0.0000 C   0  0  0  0  0  0  0  0  0  0  0  0\n"+
+			"    0.5089    5.3566    0.0000 C   0  0  0  0  0  0  0  0  0  0  0  0\n"+
+			"   -0.2055    7.4191    0.0000 N   0  0  0  0  0  0  0  0  0  0  0  0\n"+
+			"    0.5089    6.1816    0.0000 N   0  0  0  0  0  0  0  0  0  0  0  0\n"+
+			"   -0.9200    6.1816    0.0000 O   0  0  0  0  0  0  0  0  0  0  0  0\n"+
+			"    0.5089    8.6566    0.0000 O   0  0  0  0  0  0  0  0  0  0  0  0\n"+
+			"    2.4929    7.0066    0.0000 C   0  0  0  0  0  0  0  0  0  0  0  0\n"+
+			"    2.0080    7.6740    0.0000 N   0  0  0  0  0  0  0  0  0  0  0  0\n"+
+			"    2.0080    6.3391    0.0000 N   0  0  0  0  0  0  0  0  0  0  0  0\n"+
+			"    2.2630    8.4586    0.0000 C   0  0  0  0  0  0  0  0  0  0  0  0\n"+
+			"  1  7  1  0  0  0  0\n"+
+			"  8  2  1  0  0  0  0\n"+
+			"  1  3  1  0  0  0  0\n"+
+			"  2  3  2  0  0  0  0\n"+
+			"  7  4  1  0  0  0  0\n"+
+			"  4  8  1  0  0  0  0\n"+
+			"  4  9  2  0  0  0  0\n"+
+			"  7  5  1  0  0  0  0\n"+
+			"  8  6  1  0  0  0  0\n"+
+			"  1 10  2  0  0  0  0\n"+
+			"  3 12  1  0  0  0  0\n"+
+			"  2 13  1  0  0  0  0\n"+
+			" 13 11  2  0  0  0  0\n"+
+			" 12 11  1  0  0  0  0\n"+
+			" 12 14  1  0  0  0  0\n"+
+			"M  END\n";
+
+	</script>
+</head>
+<body>
+	<h1>Marvin for JavaScript Examples - Manage selection</h1>
+	<table>
+		<tr>
+			<td>
+				<div class="resizable">
+					<iframe src="../editor.html" id="sketch" class="sketcher-frame"></iframe>
+				</div>
+			</td>
+			<td>
+				<div class="molecule-div" align="center">
+					<form>
+						<p>Atoms: <input type="text" id="atoms" size=80 /></p>
+						<p>Bonds: <input type="text" id="bonds" size=80 /></p>
+						<input type="button" value="Get Selection" id="getSelectionButton"/>
+						<input type="button" value="Set Selection" id="setSelectionButton"/>
+					</form>
+				</div>
+			</td>
+		</tr>
+	</table>
+	<p>This example demonstrates how to control selection via JavaScript API. The <strong>Get selection</strong> retrieves the list of selected atoms and bonds from the editor
+	and displays it in the above form.</p>
+	<p>You can edit both the atom list and bond list in the form.</p>
+	<ul>
+		<li><strong>Delete</strong> removes the selected items from the desired list.</li>
+		<li><strong>Reset</strong> removes all items from the list.</li>
+		<li><strong>Add</strong> appends new item to the list.</li>
+	</ul>
+	<p>Atoms can be referred to by their atom index. A bond can be described with the atom index of its nodes.</p>
+	<p>With the <strong>Set selection</strong> button, you can update selection in the editor. Those atoms and bonds will be selected that are enumerated on the selection form.</p>
+	
+	<p>You can see the code comment below.</p>
+	<p>At startup, carbon label visibility and atom indices visibility is activated.</p>
+	<p>A click handler for the <strong>Get Selection</strong> button retrieve the selection object from the sketcher. It is a JSON object with comma separated lists of selected atoms and bonds.
+	There are two input fields with id <code>atoms</code> and <code>bonds</code> on the page where result of <strong>getSelection()</strong> is printed.</p>
+	<p>By the <strong>Set Selection</strong> button is submitted, the value of above fields are retrieved and a new JSON object created to submit it to the sketcher as new selection.</p>
+	<pre><code data-language="javascript">		var marvinSketcherInstance;
+
+		$(document).ready(function handleDocumentReady (e) {
+			getMarvinPromise(&quot;#sketch&quot;).done(function (sketcherInstance) {
+				marvinSketcherInstance = sketcherInstance;
+				marvinSketcherInstance.importAsMol(caffeineSource);
+				marvinSketcherInstance.setDisplaySettings({
+					'carbonLabelVisible' : true,
+					'atomIndicesVisible' : true
+				});
+
+				$(&quot;#getSelectionButton&quot;).on(&quot;click&quot;, function handleGetSelectionButton () {
+					$(&quot;#atoms&quot;).val(&quot;&quot;);
+					$(&quot;#bonds&quot;).val(&quot;&quot;);
+					var selection = marvinSketcherInstance.getSelection();
+					$(&quot;#atoms&quot;).val(selection['atoms']);
+					$(&quot;#bonds&quot;).val(selection['bonds']);
+				});
+
+				$(&quot;#setSelectionButton&quot;).on(&quot;click&quot;, function handleSetSelectionButton () {
+					marvinSketcherInstance.setSelection({
+						'atoms' : $('#atoms').val(),
+						'bonds' : $('#bonds').val()
+					});
+				});
+
+			}).fail(function () {
+				alert(&quot;Cannot retrieve sketcher instance from iframe&quot;);
+			});
+		});
+		</code></pre>
+  </body>
+</html>
